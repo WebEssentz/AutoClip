@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/api/generate-audio/route.tsx", "app/dashboard/create-new/page.jsx", "app/api/generate-image/route.jsx", "app/_context/VideoDataContext.jsx", "app/dashboard/layout.jsx", "app/api/generate-caption/route.jsx", "src/db/schema.ts", "remotion/Root.jsx", "remotion/Composition.jsx", "app/dashboard/page.jsx", "app/dashboard/_components/PlayerDialog.tsx"],
+  "exclude": ["node_modules"]
+}

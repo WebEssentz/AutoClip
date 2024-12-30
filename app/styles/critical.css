@@ -1,0 +1,17 @@
+/* styles/critical.css */
+:root {
+  --bg-main: #fff;
+  --text-main: #000;
+}
+
+[data-theme='dark'] {
+  --bg-main: #18181b;
+  --text-main: #fff;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
