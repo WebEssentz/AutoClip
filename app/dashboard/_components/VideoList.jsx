@@ -20,14 +20,14 @@ function VideoList({ videoList: initialVideoList, setVideoList }) {
   // Memoize the duration update handler
   const handleDurationUpdate = useCallback((videoId, formattedDuration) => {
     if (!videoId || !formattedDuration) return;
-    
+
     setLocalVideoList(prevList => {
       // Check if the duration is already set
       const video = prevList.find(v => v.id === videoId);
       if (video?.duration === formattedDuration) return prevList;
 
-      return prevList.map(v => 
-        v.id === videoId 
+      return prevList.map(v =>
+        v.id === videoId
           ? { ...v, duration: formattedDuration }
           : v
       );
@@ -74,7 +74,7 @@ function VideoList({ videoList: initialVideoList, setVideoList }) {
       }
     }
   }
-  
+
 
   const handleDeleteVideo = async (e, video) => {
     e.stopPropagation()
@@ -174,48 +174,59 @@ function VideoList({ videoList: initialVideoList, setVideoList }) {
     <motion.div
       variants={containerVariants}
       initial="hidden"
-      animate="show" 
+      animate="show"
       className="mt-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4"
     >
       {localVideoList?.map((video, index) => (
-        <motion.div key={video.id || index}>
-          <div 
+        <motion.div
+          key={video.id || index}
+          variants={itemVariants}
+          whileHover={{ scale: 1.02 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          className="group relative bg-zinc-900/50 backdrop-blur-sm rounded-xl overflow-hidden
+               border border-zinc-800/10 shadow-xl transition-all duration-300
+               hover:border-blue-500/20 hover:shadow-blue-500/5"
+        >
+          <div
             className="relative aspect-[9/16] overflow-hidden"
             onClick={() => {
               setOpenPlayDialog(true);
               setVideoId(video.id);
             }}
           >
+            {/* Gradient Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent 
+                    opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
+
             <Thumbnail
-  component={RemotionVideo}
-  compositionWidth={405}
-  compositionHeight={720}
-  frameToDisplay={30}
-  durationInFrames={video.captions ? Math.ceil((video.captions[video.captions.length - 1].end / 1000) * 30) : 120}
-  fps={30}
-  style={{
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
-    borderRadius: '12px',
-    cursor: 'pointer',
-  }}
-  inputProps={{
-    ...video,
-    isPreview: false,
-    durationInFrames: video.captions ? Math.ceil((video.captions[video.captions.length - 1].end / 1000) * 30) : 120,
-    setDurationInFrames: (duration) => handleDurationUpdate(video.id, duration)
-  }}
-  className="transform transition-transform duration-300 group-hover:scale-105"
-/>
+              component={RemotionVideo}
+              compositionWidth={405}
+              compositionHeight={720}
+              frameToDisplay={30}
+              durationInFrames={video.captions ? Math.ceil((video.captions[video.captions.length - 1].end / 1000) * 30) : 120}
+              fps={30}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                borderRadius: '12px',
+                cursor: 'pointer',
+              }}
+              inputProps={{
+                ...video,
+                isPreview: false,
+                durationInFrames: video.captions ? Math.ceil((video.captions[video.captions.length - 1].end / 1000) * 30) : 120,
+                setDurationInFrames: (duration) => handleDurationUpdate(video.id, duration)
+              }}
+              className="transform transition-transform duration-300 group-hover:scale-105"
+            />
 
             {/* Duration Badge */}
             <div className="absolute top-3 right-3 px-2 py-1 bg-black/70 backdrop-blur-sm 
-                          rounded-md text-xs text-white flex items-center gap-1.5 z-20">
+                    rounded-md text-xs text-white flex items-center gap-1.5 z-20">
               <Clock size={12} />
               <span>{video.duration || '00:00'}</span>
             </div>
-
 
             {/* Delete Button with Animation */}
             <motion.div
@@ -224,9 +235,9 @@ function VideoList({ videoList: initialVideoList, setVideoList }) {
               whileHover="hover"
               onClick={(e) => handleDeleteVideo(e, video)}
               className="absolute bottom-3 right-3 p-2.5 bg-red-500/80 hover:bg-red-600 
-                         backdrop-blur-sm rounded-full cursor-pointer z-20
-                         opacity-0 group-hover:opacity-100 transition-all duration-300
-                         transform hover:scale-110"
+                   backdrop-blur-sm rounded-full cursor-pointer z-20
+                   opacity-0 group-hover:opacity-100 transition-all duration-300
+                   transform hover:scale-110"
             >
               <Trash2
                 size={16}
@@ -238,23 +249,23 @@ function VideoList({ videoList: initialVideoList, setVideoList }) {
           {/* Loading/Deleting State */}
           {(video.isLoading || isDeletingMap[video.id]) && (
             <div className="absolute inset-0 bg-zinc-900/80 backdrop-blur-sm 
-                          flex items-center justify-center z-30">
+                    flex items-center justify-center z-30">
               <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent 
-                            rounded-full animate-spin" />
+                      rounded-full animate-spin" />
             </div>
           )}
         </motion.div>
       ))}
 
-<div className='cursor-pointer'>
-        <PlayerDialog 
-          playVideo={openPlayDialog} 
-          videoId={videoId} 
+      <div className='cursor-pointer'>
+        <PlayerDialog
+          playVideo={openPlayDialog}
+          videoId={videoId}
           onClose={() => {
             setOpenPlayDialog(false);
             setVideoId(undefined);
           }}
-        />    
+        />
       </div>
     </motion.div>
   )
