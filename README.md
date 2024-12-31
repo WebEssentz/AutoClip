@@ -8,7 +8,7 @@
 
 #### Transform Text into Cinema-Quality Videos with AI Magic ✨
 
-[![Next.js 14](https://img.shields.io/badge/Next.js%2014-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![Next.js 15](https://img.shields.io/badge/Next.js%2014-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com)
 [![GitHub Copilot](https://img.shields.io/badge/GitHub%20Copilot-24292e?style=for-the-badge&logo=github&logoColor=white)](https://github.com/features/copilot)
