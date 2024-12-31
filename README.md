@@ -122,6 +122,7 @@ graph TD
     style E fill:#3730A3,stroke:#4F46E5
     style F fill:#312E81,stroke:#4F46E5
     style G fill:#1E1B4B,stroke:#4F46E5
+```
 
 ## 🚀 Getting Started
 # Clone the repository
