@@ -39,10 +39,10 @@ function PlayerDialog({ playVideo, videoId, onClose }) {
   const getVideoData = async () => {
     setIsLoading(true)
     setError(null)
-    
+
     try {
       const result = await db.select().from(VideoData).where(eq(VideoData.id, videoId))
-      
+
       if (!result?.[0]) {
         throw new Error('Video data not found')
       }
@@ -52,10 +52,10 @@ function PlayerDialog({ playVideo, videoId, onClose }) {
       }
 
       setVideoData(result[0])
-      // Calculate duration based on content
-      const frameCount = result[0].captions?.length * 30 || 100 // 30 frames per caption or default
+      // Calculate duration based on content - ensure it's a number
+      const frameCount = Math.round(Number(result[0].captions?.length * 30)) || 100 // 30 frames per caption or default
       setDurationInFrames(frameCount)
-      
+
     } catch (error) {
       console.error('Error fetching video data:', error)
       setError(error.message)
@@ -90,22 +90,22 @@ function PlayerDialog({ playVideo, videoId, onClose }) {
       const mediaRecorder = new MediaRecorder(stream, {
         mimeType: 'video/webm;codecs=vp9'
       })
-      
+
       const chunks = []
 
       // Handle recording data
       mediaRecorder.ondataavailable = (e) => chunks.push(e.data)
-      
+
       // Handle recording completion
       mediaRecorder.onstop = async () => {
         try {
           const blob = new Blob(chunks, { type: 'video/mp4' })
-          
+
           // Update progress
           toast.loading("Uploading video to storage...", { id: toastId })
-          
+
           // Upload to Firebase
-          await uploadBytes(storageRef, blob, { 
+          await uploadBytes(storageRef, blob, {
             contentType: 'video/mp4',
             customMetadata: {
               videoId: videoId,
@@ -137,13 +137,13 @@ function PlayerDialog({ playVideo, videoId, onClose }) {
       // Start recording process
       toast.loading("Recording video...", { id: toastId })
       mediaRecorder.start()
-      
+
       // Reset and play video
       videoElement.currentTime = 0
       await videoElement.play()
-      
+
       // Stop recording after video duration
-      const duration = videoElement.duration * 1000 || durationInFrames * (1000/30)
+      const duration = videoElement.duration * 1000 || durationInFrames * (1000 / 30)
       setTimeout(() => {
         mediaRecorder.stop()
         videoElement.pause()
@@ -168,8 +168,8 @@ function PlayerDialog({ playVideo, videoId, onClose }) {
           <DialogTitle className="text-3xl font-bold my-5 text-center">
             {isLoading ? "Loading Your Video..." : "Your Video is Ready"}
           </DialogTitle>
-          
-          <DialogDescription className="min-h-[450px] flex items-center justify-center">
+
+          <div className="min-h-[450px] flex items-center justify-center">
             {isLoading ? (
               <div className="flex items-center gap-2">
                 <Loader2 className="w-6 h-6 animate-spin" />
@@ -178,8 +178,8 @@ function PlayerDialog({ playVideo, videoId, onClose }) {
             ) : error ? (
               <div className="text-center text-red-500">
                 <p>{error}</p>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="mt-4"
                   onClick={() => getVideoData()}
                 >
@@ -190,23 +190,25 @@ function PlayerDialog({ playVideo, videoId, onClose }) {
               <div className="flex flex-col items-center mb-5 hover:cursor-pointer">
                 <Player
                   component={RemotionVideo}
-                  durationInFrames={Number(durationInFrames.toFixed(0))}
+                  durationInFrames={videoData?.captions ? Math.ceil((videoData.captions[videoData.captions.length - 1].end / 1000) * 30) : 120}
                   compositionHeight={450}
                   compositionWidth={300}
                   fps={30}
                   controls={true}
                   inputProps={{
                     ...videoData,
-                    setDurationInFrames: setDurationInFrames,
+                    isPreview: true,
+                    durationInFrames: videoData?.captions ? Math.ceil((videoData.captions[videoData.captions.length - 1].end / 1000) * 30) : 120,
+                    setDurationInFrames: setDurationInFrames
                   }}
                 />
               </div>
             ) : null}
-          </DialogDescription>
+          </div>
 
           <div className="flex gap-10 mt-6 justify-center">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               onClick={() => {
                 router.replace('/dashboard')
                 setOpenDialog(false)
@@ -215,7 +217,7 @@ function PlayerDialog({ playVideo, videoId, onClose }) {
             >
               Cancel
             </Button>
-            
+
             {!error && videoData && (
               <Button
                 onClick={handleExport}

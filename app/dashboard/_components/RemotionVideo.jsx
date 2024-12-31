@@ -1,16 +1,37 @@
-import React from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { AbsoluteFill, Audio, Img, interpolate, Sequence, useCurrentFrame, useVideoConfig } from 'remotion';
 
-function RemotionVideo({ script, imageList, audioFileUrl, captions, setDurationInFrames }) {
+function RemotionVideo({ script, imageList, audioFileUrl, captions, setDurationInFrames, isPreview, durationInFrames: forcedDuration }) {
   const { fps } = useVideoConfig();
   const frame = useCurrentFrame();
 
-  const calculateDuration = () => {
-    const duration = captions[captions?.length - 1]?.end / 1000 * fps;
-    setDurationInFrames(duration);
-    return duration;
-  };
+  const calculateDuration = useCallback(() => {
+    if (forcedDuration) return forcedDuration;
+    if (!captions?.length) return 0;
 
+    const lastCaption = captions[captions.length - 1];
+    const durationInSeconds = lastCaption.end / 1000;
+    const durationInFrames = Math.ceil(durationInSeconds * fps);
+    return durationInFrames;
+  }, [captions, fps, forcedDuration]);
+
+  const formatDuration = useCallback((frames) => {
+    const totalSeconds = Math.ceil(frames / fps);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  }, [fps]);
+
+  // Calculate duration once and store it
+  useEffect(() => {
+    if (!isPreview && captions?.length && setDurationInFrames) {
+      const frames = calculateDuration();
+      const formatted = formatDuration(frames);
+      setDurationInFrames(formatted);
+    }
+  }, [captions, calculateDuration, formatDuration, setDurationInFrames, isPreview]);
+
+  const duration = calculateDuration();
   const getCurrentCaptions = () => {
     const currentTime = (frame / fps) * 1000;
     const currentCaption = captions.find(
@@ -23,17 +44,19 @@ function RemotionVideo({ script, imageList, audioFileUrl, captions, setDurationI
     script && (
       <AbsoluteFill className="bg-background">
         {imageList?.map((item, index) => {
-          const startTime = (index * calculateDuration()) / imageList?.length;
-          const duration = calculateDuration();
+          const totalDuration = duration;
+          const segmentDuration = totalDuration / (imageList?.length || 1);
+          const startTime = index * segmentDuration;
 
           const scale = (index) => interpolate(
             frame,
-            [startTime, startTime+duration/2, startTime+duration],
-            index%2==0 ? [1, 1.8, 1]: [1.8, 1, 1.8],
-            {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}
-          )
+            [startTime, startTime + segmentDuration / 2, startTime + segmentDuration],
+            index % 2 === 0 ? [1, 1.8, 1] : [1.8, 1, 1.8],
+            { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+          );
+
           return (
-            <Sequence key={index} from={startTime} durationInFrames={calculateDuration()}>
+            <Sequence key={index} from={startTime} durationInFrames={segmentDuration}>
               <AbsoluteFill className="justify-center items-center">
                 <Img
                   src={item}
@@ -68,4 +91,4 @@ function RemotionVideo({ script, imageList, audioFileUrl, captions, setDurationI
   );
 }
 
-export default RemotionVideo;
+export default React.memo(RemotionVideo);
