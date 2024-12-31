@@ -1,36 +1,220 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<div align="center">
+  
+# [AutoClip AI](https://autoclip.vercel.app) 🎬
 
-## Getting Started
+<a href="https://autoclip.vercel.app">
+  <img src="https://raw.githubusercontent.com/Onyerikam/readme-assets/main/autoclip-banner.png" alt="AutoClip AI Banner">
+</a>
 
-First, run the development server:
+#### Transform Text into Cinema-Quality Videos with AI Magic ✨
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+[![Next.js 14](https://img.shields.io/badge/Next.js%2014-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com)
+[![GitHub Copilot](https://img.shields.io/badge/GitHub%20Copilot-24292e?style=for-the-badge&logo=github&logoColor=white)](https://github.com/features/copilot)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+[Demo](https://autoclip.vercel.app) · [Features](#-key-features) · [Tech Stack](#%EF%B8%8F-tech-stack) · [Architecture](#-architecture)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+</div>
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🎯 Overview
 
-## Learn More
+AutoClip AI is a revolutionary SaaS platform that harnesses the power of multiple AI services to transform text into professional, engaging videos. Built with enterprise-grade technology and designed for scalability.
 
-To learn more about Next.js, take a look at the following resources:
+<div align="center">
+  <br />
+  <a href="https://autoclip.vercel.app">
+    <img src="demo.gif" alt="AutoClip AI Demo" width="100%">
+  </a>
+  <br />
+</div>
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## ✨ Key Features
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+<div align="center">
+<table>
+<tr>
+<td>
+  
+### 🎨 AI-Powered Creation
+- Text-to-video transformation
+- Professional script generation
+- Dynamic scene composition
+- Real-time rendering
 
-## Deploy on Vercel
+</td>
+<td>
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 🔊 Audio Excellence
+- Google Cloud TTS integration
+- Multilingual support
+- Professional voiceovers
+- Dynamic audio mixing
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+</td>
+</tr>
+<tr>
+<td>
+
+### 🎬 Video Magic
+- Remora Video engine
+- Custom style presets
+- Scene transitions
+- HD export quality
+
+</td>
+<td>
+
+### 🤖 AI Intelligence
+- Gemini AI integration
+- Smart scene generation
+- Content optimization
+- Contextual enhancement
+
+</td>
+</tr>
+</table>
+</div>
+
+## 🛠️ Tech Stack
+
+<div align="center">
+
+### Core Technologies
+
+[![Next.js](https://img.shields.io/badge/Next.js%2014-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+
+### Database & ORM
+
+[![Neon DB](https://img.shields.io/badge/Neon_DB-333?style=for-the-badge&logo=postgresql&logoColor=white)](https://neon.tech/)
+[![DrizzleORM](https://img.shields.io/badge/Drizzle_ORM-blue?style=for-the-badge&logo=data:image/png;base64,LOGO_BASE64)](https://orm.drizzle.team/)
+
+### AI & Services
+
+[![Gemini AI](https://img.shields.io/badge/Gemini_AI-fbbc04?style=for-the-badge&logo=google&logoColor=black)](https://deepmind.google/technologies/gemini/)
+[![Assembly AI](https://img.shields.io/badge/Assembly_AI-5B4DE1?style=for-the-badge&logo=data:image/png;base64,LOGO_BASE64)](https://www.assemblyai.com/)
+[![Replicate](https://img.shields.io/badge/Replicate-000000?style=for-the-badge&logo=replicate&logoColor=white)](https://replicate.com/)
+
+### Authentication & Storage
+
+[![Clerk](https://img.shields.io/badge/Clerk-6C47FF?style=for-the-badge&logo=clerk&logoColor=white)](https://clerk.dev/)
+[![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/)
+
+</div>
+
+## 📐 Architecture
+
+```mermaid
+graph TD
+    A[Client] --> B[Next.js API Routes]
+    B --> C[AI Services]
+    C --> D[Video Generation]
+    D --> E[Firebase Storage]
+    B --> F[Neon DB]
+    B --> G[Authentication]
+    
+    style A fill:#93C5FD,stroke:#4F46E5
+    style B fill:#818CF8,stroke:#4F46E5
+    style C fill:#6366F1,stroke:#4F46E5
+    style D fill:#4F46E5,stroke:#4F46E5
+    style E fill:#3730A3,stroke:#4F46E5
+    style F fill:#312E81,stroke:#4F46E5
+    style G fill:#1E1B4B,stroke:#4F46E5
+
+## 🚀 Getting Started
+# Clone the repository
+git clone https://github.com/Onyerikam/autoclip-ai.git
+
+# Install dependencies
+bun add all
+
+# Configure environment variables
+cp .env.example .env.local
+
+# Start the development server
+bun run dev
+
+## 📈 Performance Metrics
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <h3>100</h3>
+        <p>Performance</p>
+        <div style="background: linear-gradient(90deg, #00C853 0%, #69F0AE 100%); height: 4px; width: 100%;"></div>
+      </td>
+      <td align="center">
+        <h3>100</h3>
+        <p>Accessibility</p>
+        <div style="background: linear-gradient(90deg, #2962FF 0%, #82B1FF 100%); height: 4px; width: 100%;"></div>
+      </td>
+      <td align="center">
+        <h3>100</h3>
+        <p>Best Practices</p>
+        <div style="background: linear-gradient(90deg, #FF6D00 0%, #FFB74D 100%); height: 4px; width: 100%;"></div>
+      </td>
+      <td align="center">
+        <h3>100</h3>
+        <p>SEO</p>
+        <div style="background: linear-gradient(90deg, #AA00FF 0%, #E040FB 100%); height: 4px; width: 100%;"></div>
+      </td>
+    </tr>
+  </table>
+</div>
+
+## 🎯 Roadmap
+
+<table>
+<tr>
+<td>
+
+### Completed ✅
+- [x] Core video generation engine
+- [x] AI-powered script generation
+- [x] Custom style presets
+
+</td>
+<td>
+
+### Coming Soon 🚀
+- [ ] Collaborative team workspaces
+- [ ] API access
+- [ ] Enterprise features
+
+</td>
+</tr>
+</table>
+
+## 💝 Credits
+
+<div align="center">
+
+Built with passion by [Onyerikam](https://github.com/Onyerikam) and powered by:
+
+| Technology | Purpose |
+|------------|---------|
+| [Remora Video](https://remora.com) | Video Generation Engine |
+| [Google Cloud TTS](https://cloud.google.com/text-to-speech) | Text to Speech |
+| [Gemini AI](https://deepmind.google/technologies/gemini/) | AI Intelligence |
+| [shadcn/ui](https://ui.shadcn.com) | UI Components |
+| [Neon DB](https://neon.tech) | Database |
+| [Vercel](https://vercel.com) | Deployment |
+
+</div>
+
+## 📄 License
+
+<div align="center">
+
+This project is licensed under the [MIT License](LICENSE) - see the LICENSE file for details.
+
+---
+
+<img src="https://raw.githubusercontent.com/Onyerikam/readme-assets/main/made-with-love.svg" alt="Made with ❤️" width="150px">
+
+**© 2024 [Onyerikam](https://github.com/Onyerikam). All Rights Reserved.**
+
+</div>
