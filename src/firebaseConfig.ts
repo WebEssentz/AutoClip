@@ -7,7 +7,7 @@ import { getStorage } from "firebase/storage";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyDw_h6J9oAg_2HdpsDpPtsKIn-v0qOV14M",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: "tubeguruji-startups.firebaseapp.com",
   databaseURL: "https://tubeguruji-startups-default-rtdb.firebaseio.com",
   projectId: "tubeguruji-startups",
