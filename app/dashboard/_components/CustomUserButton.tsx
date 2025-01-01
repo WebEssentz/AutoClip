@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings, User } from "lucide-react";
+import { LogOut, User } from "lucide-react";
 
 export function CustomUserButton() {
   const { signOut } = useClerk();
@@ -73,19 +73,6 @@ export function CustomUserButton() {
             Account
           </Button>
         </DropdownMenuItem>
-        
-        <DropdownMenuItem asChild>
-          <Button 
-            variant="ghost" 
-            className="w-full justify-start"
-            onClick={() => router.push('/settings')}
-          >
-            <Settings className="mr-2 h-4 w-4" />
-            Settings
-          </Button>
-        </DropdownMenuItem>
-        
-        <DropdownMenuSeparator />
         
         <DropdownMenuItem asChild>
           <Button 

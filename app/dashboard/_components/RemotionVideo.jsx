@@ -10,9 +10,11 @@ function RemotionVideo({ script, imageList, audioFileUrl, captions, setDurationI
     if (!captions?.length) return 0;
     
     const lastCaption = captions[captions.length - 1];
-    const durationInSeconds = lastCaption.end / 1000;
+    // Use the original timing but add a small buffer (300ms) for natural ending
+    const durationInSeconds = (lastCaption.end + 300) / 1000;
     const durationInFrames = Math.ceil(durationInSeconds * fps);
-    return durationInFrames;
+    // Add 1 second worth of frames as safety buffer
+    return durationInFrames + fps;
   }, [captions, fps, forcedDuration]);
 
   const formatDuration = useCallback((frames) => {
@@ -83,7 +85,17 @@ function RemotionVideo({ script, imageList, audioFileUrl, captions, setDurationI
             </Sequence>
           );
         })}
-        {audioFileUrl && <Audio src={audioFileUrl} />}
+        {audioFileUrl && (
+          <Audio 
+            src={audioFileUrl}
+            volume={interpolate(
+              frame,
+              [duration - fps, duration],
+              [1, 0.9],
+              {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}
+            )}
+          />
+        )}
       </AbsoluteFill>
     )
   );

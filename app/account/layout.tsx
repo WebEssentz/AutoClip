@@ -1,4 +1,4 @@
-// app/account/layout.jsx
+// app/account/layout.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -11,9 +11,9 @@ import { Users } from '@/src/db/schema';
 import { db } from '@/src/db';
 import { eq } from 'drizzle-orm';
 
-export default function AccountLayout({ children }) {
+export default function AccountLayout({ children }: { children: React.ReactNode }) {
   const [videoData, setVideoData] = useState([]);
-  const [userDetail, setUserDetail] = useState([]);
+  const [userDetail, setUserDetail] = useState<any>([]);
   const { user } = useUser();
 
   useEffect(() => {
@@ -36,9 +36,8 @@ export default function AccountLayout({ children }) {
           <div>
             <Header />
           </div>
-          <main className="md:ml-64 pt-20 p-10"> {/* Changed pt-14 to pt-20 for more top padding */}
-            <div className="max-w-7xl mx-auto space-y-6"> {/* Added space-y-6 for better content spacing */}
-              <h1 className="text-4xl font-bold mb-8">Account Settings</h1>
+          <main className="md:ml-64 pt-20 p-10">
+            <div className="max-w-7xl mx-auto space-y-6">
               {children}
             </div>
           </main>

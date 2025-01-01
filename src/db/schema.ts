@@ -7,8 +7,11 @@ export const Users = pgTable('users', {
   email: varchar('email').notNull().unique(),
   imageUrl: varchar('imageUrl'),
   subscription: boolean('subscription').default(false),
-  credits: integer('credits').default(30), //30 Credits = 3 Videos,
-  lastCreditReset: timestamp('last_credit_reset'), // Add this field to Users table
+  credits: integer('credits').default(30),
+  lastCreditReset: timestamp('last_credit_reset'),
+  stripeCustomerId: varchar('stripe_customer_id'),
+  subscriptionId: varchar('subscription_id'),
+  currentPeriodEnd: timestamp('current_period_end'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
