@@ -6,7 +6,6 @@
   "functions": {
     "api/generate-audio": {
       "memory": 1024,
-      "maxDuration": 10
     }
   },
   "headers": [
