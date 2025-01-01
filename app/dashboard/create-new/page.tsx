@@ -41,97 +41,159 @@ function CreateNew() {
     totalImages: 0
   });
 
-  const getVideoScript = async () => {
-    const toastId = toast.loading('Generating video script...');
-    setIsLoading(true);
-    
-    try {
-      const resp = await axios.post('/api/get-video-script', {
-        prompt: `Write a script to generate a ${formData.duration} video on topic: ${formData.topic} along with AI image prompts in ${formData.imageStyle}`
-      });
+  // Add this near the top of your file or in a separate config file
+axios.defaults.timeout = 300000; // 5 minutes global timeout
+axios.defaults.maxContentLength = Infinity;
+axios.defaults.maxBodyLength = Infinity;
 
-      if (resp.data.result) {
-        setVideoScript(resp.data.result);
-        setVideoData(prev => ({ ...prev, 'videoScript': resp.data.result }));
-        setGenerationProgress(prev => ({ ...prev, script: true }));
-        toast.success('Script generated successfully!', { id: toastId });
-        await generateAudioFile(resp.data.result);
-      }
+  // Add these utility functions at the top of your file
+const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+const retryOperation = async (
+  operation: () => Promise<any>,
+  maxRetries = 3,
+  delay = 2000,
+  backoff = 2
+) => {
+  let lastError;
+  
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await operation();
     } catch (error) {
-      toast.error('Failed to generate script', { id: toastId });
-      console.error("Error:", error);
+      lastError = error;
+      if (i < maxRetries - 1) {
+        await wait(delay * Math.pow(backoff, i));
+      }
     }
-  };
+  }
+  throw lastError;
+};
 
-  const generateAudioFile = async (videoScriptData) => {
-    const toastId = toast.loading('Generating audio...');
+// Update your API calling functions with retry logic:
+
+ // Update your API calling functions with retry logic:
+
+const getVideoScript = async () => {
+  const toastId = toast.loading('Generating video script...');
+  setIsLoading(true);
+  
+  try {
+    const resp = await retryOperation(
+      async () => axios.post('/api/get-video-script', {
+        prompt: `Write a script to generate a ${formData.duration} video on topic: ${formData.topic} along with AI image prompts in ${formData.imageStyle}`
+      }, {
+        timeout: 60000 // 60 second timeout
+      }),
+      3, // max retries
+      2000 // initial delay
+    );
+
+    if (resp.data.result) {
+      setVideoScript(resp.data.result);
+      setVideoData(prev => ({ ...prev, 'videoScript': resp.data.result }));
+      setGenerationProgress(prev => ({ ...prev, script: true }));
+      toast.success('Script generated successfully!', { id: toastId });
+      await generateAudioFile(resp.data.result);
+    }
+  } catch (error) {
+    toast.error('Failed to generate script after multiple attempts', { id: toastId });
+    console.error("Error:", error);
+    setIsLoading(false);
+  }
+};
+
+const generateAudioFile = async (videoScriptData) => {
+  const toastId = toast.loading('Generating audio...');
+  
+  try {
+    let script = videoScriptData.map(item => item.ContentText).join(' ');
+    const id = uuidv4();
     
-    try {
-      let script = videoScriptData.map(item => item.ContentText).join(' ');
-      const id = uuidv4();
-      
-      const resp = await axios.post('/api/generate-audio', {
+    const resp = await retryOperation(
+      async () => axios.post('/api/generate-audio', {
         text: script,
         id: id
-      });
+      }, {
+        timeout: 300000 // 5 minute timeout
+      }),
+      5, // more retries for audio generation
+      3000 // longer initial delay
+    );
 
-      setAudioFileUrl(resp.data.result);
-      setVideoData(prev => ({ ...prev, 'audioFileUrl': resp.data.result }));
-      setGenerationProgress(prev => ({ ...prev, audio: true }));
-      
-      toast.success('Audio generated successfully!', { id: toastId });
-      await generateAudioCaption(resp.data.result, videoScriptData);
-    } catch (error) {
-      toast.error('Failed to generate audio', { id: toastId });
-      console.error("Error:", error);
-    }
-  };
-
-  const generateAudioCaption = async (fileUrl, videoScriptData) => {
-    const toastId = toast.loading('Generating captions...');
+    setAudioFileUrl(resp.data.result);
+    setVideoData(prev => ({ ...prev, 'audioFileUrl': resp.data.result }));
+    setGenerationProgress(prev => ({ ...prev, audio: true }));
     
-    try {
-      const resp = await axios.post('/api/generate-caption', {
+    toast.success('Audio generated successfully!', { id: toastId });
+    await generateAudioCaption(resp.data.result, videoScriptData);
+  } catch (error) {
+    toast.error('Failed to generate audio after multiple attempts', { id: toastId });
+    console.error("Error:", error);
+    setIsLoading(false);
+  }
+};
+
+const generateAudioCaption = async (fileUrl, videoScriptData) => {
+  const toastId = toast.loading('Generating captions...');
+  
+  try {
+    const resp = await retryOperation(
+      async () => axios.post('/api/generate-caption', {
         audioFileUrl: fileUrl,
-      });
+      }, {
+        timeout: 120000 // 2 minute timeout
+      }),
+      3,
+      2000
+    );
 
-      setCaptions(resp.data.result);
-      setVideoData(prev => ({ ...prev, 'captions': resp.data.result }));
-      setGenerationProgress(prev => ({ ...prev, captions: true }));
-      
-      toast.success('Captions generated successfully!', { id: toastId });
-      await generateImage(videoScriptData);
-    } catch (error) {
-      toast.error('Failed to generate captions', { id: toastId });
-      console.error("Error:", error);
-    }
-  };
-
-  const generateImage = async (videoScriptData) => {
-    const toastId = toast.loading('Generating images...');
-    setGenerationProgress(prev => ({ ...prev, totalImages: videoScriptData.length }));
+    setCaptions(resp.data.result);
+    setVideoData(prev => ({ ...prev, 'captions': resp.data.result }));
+    setGenerationProgress(prev => ({ ...prev, captions: true }));
     
-    let images = [];
-    try {
-      for (let i = 0; i < videoScriptData.length; i++) {
-        const element = videoScriptData[i];
-        const resp = await axios.post('/api/generate-image', {
-          prompt: element.imagePrompt,
-        });
-        
-        images.push(resp.data.result);
-        setGenerationProgress(prev => ({ ...prev, images: i + 1 }));
-        toast.loading(`Generating image ${i + 1}/${videoScriptData.length}...`, { id: toastId });
-      }
+    toast.success('Captions generated successfully!', { id: toastId });
+    await generateImage(videoScriptData);
+  } catch (error) {
+    toast.error('Failed to generate captions after multiple attempts', { id: toastId });
+    console.error("Error:", error);
+    setIsLoading(false);
+  }
+};
 
-      setImageList(images);
-      setVideoData(prev => ({ ...prev, 'imageList': images }));
-      toast.success('All images generated successfully!', { id: toastId });
-    } catch (error) {
-      toast.error('Failed to generate images', { id: toastId });
-      console.error("Error:", error);
+const generateImage = async (videoScriptData) => {
+  const toastId = toast.loading('Generating images...');
+  setGenerationProgress(prev => ({ ...prev, totalImages: videoScriptData.length }));
+  
+  let images = [];
+  try {
+    for (let i = 0; i < videoScriptData.length; i++) {
+      const element = videoScriptData[i];
+      
+      const resp = await retryOperation(
+        async () => axios.post('/api/generate-image', {
+          prompt: element.imagePrompt,
+        }, {
+          timeout: 120000 // 2 minute timeout
+        }),
+        3,
+        2000
+      );
+      
+      images.push(resp.data.result);
+      setGenerationProgress(prev => ({ ...prev, images: i + 1 }));
+      toast.loading(`Generating image ${i + 1}/${videoScriptData.length}...`, { id: toastId });
     }
-  };
+
+    setImageList(images);
+    setVideoData(prev => ({ ...prev, 'imageList': images }));
+    toast.success('All images generated successfully!', { id: toastId });
+  } catch (error) {
+    toast.error('Failed to generate images after multiple attempts', { id: toastId });
+    console.error("Error:", error);
+    setIsLoading(false);
+  }
+};
 
   // Modified useEffect to check all assets are ready
   useEffect(() => {
