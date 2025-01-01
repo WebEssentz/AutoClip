@@ -3,11 +3,6 @@
     "path": "/api/cron/refresh-credits",
     "schedule": "0 0 1 * *"
   }],
-  "functions": {
-    "api/generate-audio": {
-      "memory": 1024
-    }
-  },
   "headers": [
     {
       "source": "/api/(.*)",
