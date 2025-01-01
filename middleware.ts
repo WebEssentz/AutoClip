@@ -13,8 +13,14 @@ const isPublicRoute = createRouteMatcher([
   '/privacy(.*)'
 ]);
 
+// middleware.ts
 export default clerkMiddleware(async (auth, req) => {
   const session = await auth();
+
+  // Allow sign-out callback to process
+  if (req.nextUrl.pathname.startsWith('/sign-out-callback')) {
+    return NextResponse.next();
+  }
 
   // Allow SSO callback to process
   if (req.nextUrl.pathname.startsWith('/sso-callback')) {
@@ -26,7 +32,7 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.redirect(new URL('/dashboard', req.url));
   }
 
-  // If user is not logged in and tries to access protected routes or root, redirect to sign-in
+  // If user is not logged in and tries to access protected routes, redirect to sign-in
   if (!session?.userId && (isProtectedRoute(req))) {
     return NextResponse.redirect(new URL('/sign-in', req.url));
   }

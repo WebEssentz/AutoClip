@@ -1,18 +1,26 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
+import { CustomUserButton } from './CustomUserButton';
 import { UserButton, useUser } from '@clerk/nextjs'
 import { Menu, X, Command, CircleUser, FileVideo, ShieldPlus, LucideIcon, LayoutGrid} from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import React, { useContext, useState } from 'react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { UserDetailContext } from '@/app/_context/UserDetailContext'
 
 function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const { user } = useUser()
+  const { user } = useUser();
+  const router = useRouter();
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    router.push('/sign-out-callback');
+  };
 
   interface MenuItem {
     id: number
@@ -99,26 +107,12 @@ function Header() {
               </Link>
             </Button>
             <div className="h-6 w-px bg-border/40 mx-2" /> */}
-            <UserButton 
-              afterSignOutUrl="/sign-in"
-              appearance={{
-                elements: {
-                  avatarBox: "h-8 w-8"
-                }
-              }}
-            />
+            <CustomUserButton />
           </div>
 
           {/* Mobile Menu Button */}
           <div className="flex md:hidden items-center gap-2">
-            <UserButton 
-              afterSignOutUrl="/sign-in"
-              appearance={{
-                elements: {
-                  avatarBox: "h-8 w-8"
-                }
-              }}
-            />
+          <CustomUserButton />
             <Button
               variant="ghost"
               size="icon"

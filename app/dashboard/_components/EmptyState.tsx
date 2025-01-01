@@ -109,7 +109,7 @@ function EmptyState() {
                   transition-colors duration-200" 
                 />
                 <span className="relative flex items-center gap-2 py-2">
-                  <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <Plus className="w-4 h-4 sm:w-5 sm:h-5 mr-2 group-hover:rotate-90 transition-transform" />
                   Create your first clip
                 </span>
               </Button>

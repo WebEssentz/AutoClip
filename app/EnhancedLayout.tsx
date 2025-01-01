@@ -12,7 +12,6 @@ const Toaster = lazy(() =>
   }))
 );
 
-// app/EnhancedLayout.tsx
 export function EnhancedLayout() {
   const [mounted, setMounted] = useState(false);
 
@@ -41,14 +40,6 @@ export function EnhancedLayout() {
           position="top-center"
           richColors
           closeButton
-          theme="system" // This will follow system theme
-          toastOptions={{
-            style: {
-              background: 'var(--bg-secondary)',
-              color: 'var(--text-primary)',
-              border: '1px solid var(--border-color)',
-            },
-          }}
         />
       </Suspense>
     </Provider>
