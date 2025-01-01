@@ -22,6 +22,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/api/generate-audio/route.tsx", "app/dashboard/create-new/page.jsx", "app/api/generate-image/route.jsx", "app/_context/VideoDataContext.jsx", "app/dashboard/layout.jsx", "app/api/generate-caption/route.jsx", "src/db/schema.ts", "remotion/Root.jsx", "remotion/Composition.jsx", "app/dashboard/page.jsx", "app/dashboard/_components/PlayerDialog.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/api/generate-audio/route.tsx", "app/dashboard/create-new/page.jsx", "app/api/generate-image/route.jsx", "app/_context/VideoDataContext.jsx", "app/dashboard/layout.jsx", "app/api/generate-caption/route.jsx", "src/db/schema.ts", "remotion/Root.jsx", "remotion/Composition.jsx", "app/dashboard/page.jsx", "app/dashboard/_components/PlayerDialog.tsx", "app/_context/UserDetailContext.Jsx"],
   "exclude": ["node_modules"]
 }

@@ -10,20 +10,49 @@ import { useUser } from '@clerk/nextjs';
 import { Users } from '@/src/db/schema';
 import { db } from '@/src/db';
 import { eq } from 'drizzle-orm';
+import { toast } from 'sonner';
 
-export default function AccountLayout({ children }: { children: React.ReactNode }) {
-  const [videoData, setVideoData] = useState([]);
-  const [userDetail, setUserDetail] = useState<any>([]);
+// Define proper types
+type UserDetail = typeof Users.$inferSelect;
+
+interface AccountLayoutProps {
+  children: React.ReactNode;
+}
+
+export default function AccountLayout({ children }: AccountLayoutProps) {
+  const [videoData, setVideoData] = useState<any[]>([]);
+  const [userDetail, setUserDetail] = useState<UserDetail | null>(null);
   const { user } = useUser();
 
   useEffect(() => {
-    user && getUserDetail();
+    if (user?.primaryEmailAddress?.emailAddress) {
+      getUserDetail();
+    }
   }, [user]);
 
   const getUserDetail = async () => {
-    const result = await db.select().from(Users)
-      .where(eq(Users.email, user?.primaryEmailAddress?.emailAddress));
-    setUserDetail(result[0]);
+    try {
+      const email = user?.primaryEmailAddress?.emailAddress;
+      
+      if (!email) {
+        toast.error('No email address found');
+        return;
+      }
+
+      const result = await db
+        .select()
+        .from(Users)
+        .where(eq(Users.email, email));
+
+      if (result && result[0]) {
+        setUserDetail(result[0]);
+      } else {
+        console.warn('No user details found for email:', email);
+      }
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+      toast.error('Failed to fetch user details');
+    }
   };
 
   return (
