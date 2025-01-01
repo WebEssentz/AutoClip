@@ -4,7 +4,7 @@ import { storage } from '@/src/firebaseConfig'
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 const client = new TextToSpeechClient({
-  apiKey: process.env.GOOGLE_API_KEY || "AIzaSyC_LryFtohSMah4T3QMWzSEwMvUXDWPNMo"
+  apiKey: "AIzaSyC_LryFtohSMah4T3QMWzSEwMvUXDWPNMo"
 });
 
 // Add this to handle longer execution time
@@ -85,4 +85,24 @@ export async function POST(req: NextRequest) {
       status: 500 
     });
   }
+}
+
+// Handle OPTIONS requests for CORS
+export async function OPTIONS(req: NextRequest) {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+  });
+}
+
+// Return 405 for other methods
+export async function GET(req: NextRequest) {
+  return NextResponse.json(
+    { error: 'Method not allowed' },
+    { status: 405 }
+  );
 }

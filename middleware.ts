@@ -40,9 +40,24 @@ export default clerkMiddleware(async (auth, req) => {
   return NextResponse.next();
 });
 
+export function middleware(request: NextRequest) {
+  // Get the request origin
+  const origin = request.headers.get('origin') || '';
+
+  // Get response
+  const response = NextResponse.next();
+
+  // Add CORS headers
+  response.headers.set('Access-Control-Allow-Origin', '*');
+  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  return response;
+}
+
 export const config = {
   matcher: [
     '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    '/(api|trpc)(.*)',
+    '/api/:path*',
   ],
 };

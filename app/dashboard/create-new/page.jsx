@@ -108,25 +108,29 @@ const generateAudioFile = async (videoScriptData) => {
     let script = videoScriptData.map(item => item.ContentText).join(' ');
     const id = uuidv4();
     
-    const resp = await retryOperation(
-      () => axios.post('/api/generate-audio', {
-        text: script,
-        id: id
-      }, {
-        timeout: 300000
-      }),
-      5,
-      3000
-    );
+    const resp = await axios.post('/api/generate-audio', {
+      text: script,
+      id: id
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      timeout: 300000, // 5 minutes
+      maxBodyLength: Infinity,
+      maxContentLength: Infinity
+    });
 
-    setAudioFileUrl(resp.data.result);
-    setVideoData(prev => ({ ...prev, 'audioFileUrl': resp.data.result }));
-    setGenerationProgress(prev => ({ ...prev, audio: true }));
-    
-    toast.success('Audio generated successfully!', { id: toastId });
-    await generateAudioCaption(resp.data.result, videoScriptData);
+    if (resp.data.success) {
+      setAudioFileUrl(resp.data.result);
+      setVideoData(prev => ({ ...prev, 'audioFileUrl': resp.data.result }));
+      setGenerationProgress(prev => ({ ...prev, audio: true }));
+      toast.success('Audio generated successfully!', { id: toastId });
+      await generateAudioCaption(resp.data.result, videoScriptData);
+    } else {
+      throw new Error(resp.data.error || 'Failed to generate audio');
+    }
   } catch (error) {
-    toast.error('Failed to generate audio after multiple attempts', { id: toastId });
+    toast.error(error.message || 'Failed to generate audio', { id: toastId });
     console.error("Error:", error);
     setIsLoading(false);
   }

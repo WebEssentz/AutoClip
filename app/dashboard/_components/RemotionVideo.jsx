@@ -8,7 +8,7 @@ function RemotionVideo({ script, imageList, audioFileUrl, captions, setDurationI
   const calculateDuration = useCallback(() => {
     if (forcedDuration) return forcedDuration;
     if (!captions?.length) return 0;
-
+    
     const lastCaption = captions[captions.length - 1];
     const durationInSeconds = lastCaption.end / 1000;
     const durationInFrames = Math.ceil(durationInSeconds * fps);
@@ -44,19 +44,17 @@ function RemotionVideo({ script, imageList, audioFileUrl, captions, setDurationI
     script && (
       <AbsoluteFill className="bg-background">
         {imageList?.map((item, index) => {
-          const totalDuration = duration;
-          const segmentDuration = totalDuration / (imageList?.length || 1);
-          const startTime = index * segmentDuration;
+          const startTime = (index * calculateDuration()) / imageList?.length;
+          const duration = calculateDuration();
 
           const scale = (index) => interpolate(
             frame,
-            [startTime, startTime + segmentDuration / 2, startTime + segmentDuration],
-            index % 2 === 0 ? [1, 1.8, 1] : [1.8, 1, 1.8],
-            { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-          );
-
+            [startTime, startTime+duration/2, startTime+duration],
+            index%2==0 ? [1, 1.8, 1]: [1.8, 1, 1.8],
+            {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}
+          )
           return (
-            <Sequence key={index} from={startTime} durationInFrames={segmentDuration}>
+            <Sequence key={index} from={startTime} durationInFrames={calculateDuration()}>
               <AbsoluteFill className="justify-center items-center">
                 <Img
                   src={item}
