@@ -5,7 +5,7 @@
   }],
   "functions": {
     "api/generate-audio": {
-      "memory": 1024,
+      "memory": 1024
     }
   },
   "headers": [
