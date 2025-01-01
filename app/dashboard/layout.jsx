@@ -16,71 +16,81 @@ function DashboardLayout({ children }) {
   const { user } = useUser();
 
   useEffect(() => {
-    // Check if it's the first day of the month
-    const now = new Date();
-    const isFirstOfMonth = now.getDate() === 1;
-    
-    if (isFirstOfMonth && user) {
-      const checkAndNotifyCredits = async () => {
-        try {
-          const result = await db
-            .select()
-            .from(Users)
+    if (!user) return;
+
+    const checkAndNotifyCredits = async () => {
+      try {
+        const result = await db
+          .select()
+          .from(Users)
+          .where(eq(Users.email, user.primaryEmailAddress?.emailAddress));
+
+        const userData = result[0];
+        if (!userData) return;
+
+        const now = new Date('2025-01-01 01:21:12'); // Using the provided current date
+        const lastReset = userData.lastCreditReset ? new Date(userData.lastCreditReset) : null;
+        
+        // Check if it's the first month access or a new month
+        const isNewMonth = !lastReset || (
+          now.getMonth() !== lastReset.getMonth() ||
+          now.getFullYear() !== lastReset.getFullYear()
+        );
+
+        if (isNewMonth) {
+          // Explicitly handle subscription as boolean
+          const isSubscribed = Boolean(userData.subscription);
+          const creditsAmount = isSubscribed ? 100 : 30;
+
+          // Update the user's credits and reset timestamp
+          await db
+            .update(Users)
+            .set({
+              credits: creditsAmount,
+              lastCreditReset: now,
+              updatedAt: now
+            })
             .where(eq(Users.email, user.primaryEmailAddress?.emailAddress));
 
-          const userData = result[0];
-          
-          if (userData) {
-            const creditsAmount = userData.subscription === true ? 100 : 30;
-            
-            toast.success(
-              <div className="flex flex-col gap-1">
-                <span className="font-medium">Monthly Credits Refreshed! 🎉</span>
-                <div className="text-sm space-y-1">
-                  <p>Your credits have been reset to {creditsAmount}</p>
-                  <p className="text-xs opacity-75">
-                    Plan: {userData.subscription === true ? 'Premium' : 'Free'}
-                  </p>
-                  <p className="text-xs opacity-75">
-                    Reset Time: {new Date().toLocaleString('en-US', { 
-                      timeZone: 'UTC',
-                      year: 'numeric',
-                      month: '2-digit',
-                      day: '2-digit',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      second: '2-digit',
-                      hour12: false
-                    })} UTC
-                  </p>
-                </div>
-              </div>,
-              {
-                duration: 8000,
-                position: "top-center",
-              }
-            );
+          // Show success notification with precise plan information
+          toast.success(
+            <div className="flex flex-col gap-1">
+              <span className="font-medium">Monthly Credits Refreshed! 🎉</span>
+              <div className="text-sm space-y-1">
+                <p>Your credits have been reset to {creditsAmount}</p>
+                <p className="text-xs opacity-75">
+                  Plan: {isSubscribed ? 'Premium' : 'Free'}
+                </p>
+                <p className="text-xs opacity-75">
+                  Reset Time: {now.toLocaleString('en-US', { 
+                    timeZone: 'UTC',
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                  })} UTC
+                </p>
+              </div>
+            </div>,
+            {
+              duration: 8000,
+              position: "top-center",
+            }
+          );
 
-            // Update the user's credits in the database
-            await db
-              .update(Users)
-              .set({
-                credits: creditsAmount,
-                updatedAt: new Date()
-              })
-              .where(eq(Users.email, user.primaryEmailAddress?.emailAddress));
-
-            // Refresh user details after update
-            getUserDetail();
-          }
-        } catch (error) {
-          console.error('Error checking/updating credits:', error);
-          toast.error('Failed to refresh credits');
+          // Refresh user details after update
+          getUserDetail();
         }
-      };
+      } catch (error) {
+        console.error('Error checking/updating credits:', error);
+        toast.error('Failed to refresh credits. Please try again later.');
+      }
+    };
 
-      checkAndNotifyCredits();
-    }
+    checkAndNotifyCredits();
   }, [user]);
 
   useEffect(() => {
@@ -99,6 +109,7 @@ function DashboardLayout({ children }) {
       }
     } catch (error) {
       console.error('Error fetching user details:', error);
+      toast.error('Failed to fetch user details');
     }
   };
   

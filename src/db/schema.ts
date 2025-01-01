@@ -7,12 +7,13 @@ export const Users = pgTable('users', {
   email: varchar('email').notNull().unique(),
   imageUrl: varchar('imageUrl'),
   subscription: boolean('subscription').default(false),
-  credits:integer('credits').default(30), //30 Credits = 3 Videos,
+  credits: integer('credits').default(30), //30 Credits = 3 Videos,
+  lastCreditReset: timestamp('last_credit_reset'), // Add this field to Users table
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
-// Update VideoData table
+// Remove lastCreditReset from VideoData since it belongs in Users
 export const VideoData = pgTable('videoData', {
   id: serial('id').primaryKey(),
   script: json('script').notNull(),
@@ -23,7 +24,6 @@ export const VideoData = pgTable('videoData', {
   exportCount: integer('export_count').default(0),
   lastExportedAt: timestamp('last_exported_at'),
 });
-
 
 export const VideoExports = pgTable('videoExports', {
   id: serial('id').primaryKey(),
@@ -38,6 +38,6 @@ export const VideoExports = pgTable('videoExports', {
   creditsUsed: integer('credits_used').notNull(),
 });
 
-export type User = typeof Users.$inferSelect;
+export type Users = typeof Users.$inferSelect;
 export type videoData = typeof VideoData.$inferSelect;
 export type videoExports = typeof VideoExports.$inferSelect;

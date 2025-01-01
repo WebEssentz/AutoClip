@@ -7,11 +7,19 @@ const client = new TextToSpeechClient({
   apiKey: process.env.GOOGLE_API_KEY || "AIzaSyC_LryFtohSMah4T3QMWzSEwMvUXDWPNMo"
 });
 
-
+// Add this to handle longer execution time
+export const config = {
+  maxDuration: 300
+};
 export async function POST(req: NextRequest) {
   try {
     const { text, id } = await req.json();
     const storageRef = ref(storage, `ai-short-video-files/${id}.mp3`);
+
+    // Add input validation
+    if (!text || !id) {
+      throw new Error('Missing required parameters');
+    }
 
     const request = {
       input: { text },
@@ -41,13 +49,27 @@ export async function POST(req: NextRequest) {
       throw new Error('Invalid audio content format');
     }
 
-    // Upload to Firebase Storage
-    await uploadBytes(storageRef, audioBuffer, {
-      contentType: 'audio/mp3'
-    });
+    // Upload to Firebase Storage with retry logic
+    let downloadUrl = '';
+    const maxRetries = 3;
+    let attempt = 0;
 
-    const downloadUrl = await getDownloadURL(storageRef);
-    console.log('Download URL:', downloadUrl);
+    while (attempt < maxRetries) {
+      try {
+        await uploadBytes(storageRef, audioBuffer, {
+          contentType: 'audio/mp3',
+          customMetadata: {
+            'Cache-Control': 'public, max-age=31536000'
+          }
+        });
+        downloadUrl = await getDownloadURL(storageRef);
+        break;
+      } catch (error) {
+        attempt++;
+        if (attempt === maxRetries) throw error;
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+      }
+    }
 
     return NextResponse.json({ 
       success: true,

@@ -6,23 +6,27 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
   try {
-    // Update free users to 30 credits
+    const now = new Date();
+
+    // Update free users
     await db
       .update(Users)
       .set({
         credits: 30,
-        updatedAt: new Date()
+        lastCreditReset: now,
+        updatedAt: now
       })
       .where(
         eq(Users.subscription, false)
       );
 
-    // Update premium subscribers to 100 credits
+    // Update premium subscribers
     await db
       .update(Users)
       .set({
         credits: 100,
-        updatedAt: new Date()
+        lastCreditReset: now,
+        updatedAt: now
       })
       .where(
         eq(Users.subscription, true)
@@ -31,7 +35,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Monthly credits refreshed successfully',
-      timestamp: new Date().toISOString()
+      timestamp: now.toISOString()
     });
   } catch (error) {
     console.error('Error refreshing credits:', error);
