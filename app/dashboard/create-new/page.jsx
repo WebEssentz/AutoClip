@@ -19,6 +19,11 @@ import { UserDetailContext } from "@/app/_context/UserDetailContext";
 import { eq } from "drizzle-orm";
 import { Users } from "@/src/db/schema";
 
+// Add this near the top of your file
+axios.defaults.timeout = 300000;
+axios.defaults.maxContentLength = Infinity;
+axios.defaults.maxBodyLength = Infinity;
+
 function CreateNew() {
   const [formData, setFormData] = useState([]);
   const [currentStep, setCurrentStep] = useState(1);
@@ -46,15 +51,9 @@ axios.defaults.timeout = 300000; // 5 minutes global timeout
 axios.defaults.maxContentLength = Infinity;
 axios.defaults.maxBodyLength = Infinity;
 
-  // Add these utility functions at the top of your file
-const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-const retryOperation = async (
-  operation: () => Promise<any>,
-  maxRetries = 3,
-  delay = 2000,
-  backoff = 2
-) => {
+const retryOperation = async (operation, maxRetries = 3, delay = 2000, backoff = 2) => {
   let lastError;
   
   for (let i = 0; i < maxRetries; i++) {
@@ -63,6 +62,10 @@ const retryOperation = async (
     } catch (error) {
       lastError = error;
       if (i < maxRetries - 1) {
+        // Show retry attempt toast
+        toast.loading(`Retrying... Attempt ${i + 2} of ${maxRetries}`, {
+          duration: delay * Math.pow(backoff, i)
+        });
         await wait(delay * Math.pow(backoff, i));
       }
     }
@@ -70,23 +73,18 @@ const retryOperation = async (
   throw lastError;
 };
 
-// Update your API calling functions with retry logic:
-
- // Update your API calling functions with retry logic:
-
+// Update your API functions to use the retry logic:
 const getVideoScript = async () => {
   const toastId = toast.loading('Generating video script...');
   setIsLoading(true);
   
   try {
     const resp = await retryOperation(
-      async () => axios.post('/api/get-video-script', {
+      () => axios.post('/api/get-video-script', {
         prompt: `Write a script to generate a ${formData.duration} video on topic: ${formData.topic} along with AI image prompts in ${formData.imageStyle}`
       }, {
-        timeout: 60000 // 60 second timeout
-      }),
-      3, // max retries
-      2000 // initial delay
+        timeout: 60000
+      })
     );
 
     if (resp.data.result) {
@@ -111,14 +109,14 @@ const generateAudioFile = async (videoScriptData) => {
     const id = uuidv4();
     
     const resp = await retryOperation(
-      async () => axios.post('/api/generate-audio', {
+      () => axios.post('/api/generate-audio', {
         text: script,
         id: id
       }, {
-        timeout: 300000 // 5 minute timeout
+        timeout: 300000
       }),
-      5, // more retries for audio generation
-      3000 // longer initial delay
+      5,
+      3000
     );
 
     setAudioFileUrl(resp.data.result);
@@ -139,13 +137,11 @@ const generateAudioCaption = async (fileUrl, videoScriptData) => {
   
   try {
     const resp = await retryOperation(
-      async () => axios.post('/api/generate-caption', {
+      () => axios.post('/api/generate-caption', {
         audioFileUrl: fileUrl,
       }, {
-        timeout: 120000 // 2 minute timeout
-      }),
-      3,
-      2000
+        timeout: 120000
+      })
     );
 
     setCaptions(resp.data.result);
@@ -171,13 +167,11 @@ const generateImage = async (videoScriptData) => {
       const element = videoScriptData[i];
       
       const resp = await retryOperation(
-        async () => axios.post('/api/generate-image', {
+        () => axios.post('/api/generate-image', {
           prompt: element.imagePrompt,
         }, {
-          timeout: 120000 // 2 minute timeout
-        }),
-        3,
-        2000
+          timeout: 120000
+        })
       );
       
       images.push(resp.data.result);
