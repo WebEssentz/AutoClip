@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 
+import { calculateDurationFrames } from '@/src/utils/videoUtils';
 import { Button } from "@/components/ui/button"
 import RemotionVideo from "./RemotionVideo"
 import { Player } from "@remotion/player"
@@ -29,6 +30,24 @@ function PlayerDialog({ playVideo, videoId, onClose }) {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
   const router = useRouter()
+
+  // Update just the calculateDurationFrames function in PlayerDialog.jsx
+const calculateDurationFrames = (data) => {
+  if (!data?.captions || !Array.isArray(data.captions) || !data.captions.length) {
+    return 120;
+  }
+  
+  try {
+    const lastCaption = data.captions[data.captions.length - 1];
+    if (!lastCaption || typeof lastCaption.end !== 'number') {
+      return 120;
+    }
+    return Math.ceil((lastCaption.end / 1000) * 30) + 60; // Add 2 seconds buffer
+  } catch (error) {
+    console.error('Error calculating duration:', error);
+    return 120;
+  }
+};
 
   useEffect(() => {
     setOpenDialog(playVideo)
@@ -54,7 +73,7 @@ function PlayerDialog({ playVideo, videoId, onClose }) {
 
       setVideoData(result[0])
       // Calculate duration based on content - ensure it's a number
-      const frameCount = Math.round(Number(result[0].captions?.length * 30)) || 100 // 30 frames per caption or default
+      const frameCount = calculateDurationFrames(result[0])
       setDurationInFrames(frameCount)
 
     } catch (error) {
@@ -191,7 +210,7 @@ function PlayerDialog({ playVideo, videoId, onClose }) {
               <div className="flex flex-col items-center mb-5 hover:cursor-pointer">
                 <Player
                   component={RemotionVideo}
-                  durationInFrames={videoData?.captions ? Math.ceil((videoData.captions[videoData.captions.length - 1].end / 1000) * 30) : 120}
+                  durationInFrames={calculateDurationFrames(videoData)}
                   compositionHeight={450}
                   compositionWidth={300}
                   fps={30}
@@ -199,7 +218,7 @@ function PlayerDialog({ playVideo, videoId, onClose }) {
                   inputProps={{
                     ...videoData,
                     isPreview: true,
-                    durationInFrames: videoData?.captions ? Math.ceil((videoData.captions[videoData.captions.length - 1].end / 1000) * 30) : 120,
+                    durationInFrames: calculateDurationFrames(videoData),
                     setDurationInFrames: setDurationInFrames
                   }}
                 />

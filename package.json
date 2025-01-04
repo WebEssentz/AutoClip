@@ -63,7 +63,8 @@
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.171.0",
     "uuid": "^11.0.3",
-    "uuidv4": "^6.2.13"
+    "uuidv4": "^6.2.13",
+    "zustand": "^5.0.2"
   },
   "devDependencies": {
     "@types/node": "^20",

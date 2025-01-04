@@ -1,3 +1,4 @@
+// RemotionVideo.jsx
 import React, { useEffect, useCallback } from 'react';
 import { AbsoluteFill, Audio, Img, interpolate, Sequence, useCurrentFrame, useVideoConfig } from 'remotion';
 
@@ -7,14 +8,23 @@ function RemotionVideo({ script, imageList, audioFileUrl, captions, setDurationI
 
   const calculateDuration = useCallback(() => {
     if (forcedDuration) return forcedDuration;
-    if (!captions?.length) return 0;
-    
-    const lastCaption = captions[captions.length - 1];
-    // Use the original timing but add a small buffer (300ms) for natural ending
-    const durationInSeconds = (lastCaption.end + 300) / 1000;
-    const durationInFrames = Math.ceil(durationInSeconds * fps);
-    // Add 1 second worth of frames as safety buffer
-    return durationInFrames + fps;
+    // Return default duration if no captions or invalid captions
+    if (!captions || !Array.isArray(captions) || !captions.length) return 120;
+
+    try {
+      const lastCaption = captions[captions.length - 1];
+      if (!lastCaption || typeof lastCaption.end !== 'number') return 120;
+
+      // Increase buffer to 850ms and ensure precise calculation
+      const durationInSeconds = (lastCaption.end + 850) / 1000;
+      // Use Math.ceil to ensure we always round up
+      const durationInFrames = Math.ceil(durationInSeconds * fps);
+      // Add slightly more buffer frames
+      return durationInFrames + Math.ceil(fps * 2.1);
+    } catch (error) {
+      console.error('Error calculating duration:', error);
+      return 120; // Default duration on error
+    }
   }, [captions, fps, forcedDuration]);
 
   const formatDuration = useCallback((frames) => {
@@ -24,9 +34,8 @@ function RemotionVideo({ script, imageList, audioFileUrl, captions, setDurationI
     return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
   }, [fps]);
 
-  // Calculate duration once and store it
   useEffect(() => {
-    if (!isPreview && captions?.length && setDurationInFrames) {
+    if (!isPreview && setDurationInFrames) {
       const frames = calculateDuration();
       const formatted = formatDuration(frames);
       setDurationInFrames(formatted);
@@ -34,29 +43,33 @@ function RemotionVideo({ script, imageList, audioFileUrl, captions, setDurationI
   }, [captions, calculateDuration, formatDuration, setDurationInFrames, isPreview]);
 
   const duration = calculateDuration();
+  
   const getCurrentCaptions = () => {
+    if (!captions || !Array.isArray(captions)) return '';
+    
     const currentTime = (frame / fps) * 1000;
     const currentCaption = captions.find(
-      (word) => currentTime >= word.start && currentTime <= word.end
+      (word) => word && typeof word.start === 'number' && typeof word.end === 'number' &&
+        currentTime >= word.start && currentTime <= word.end
     );
-    return currentCaption ? currentCaption.text : '';
+    return currentCaption?.text || '';
   };
 
   return (
     script && (
       <AbsoluteFill className="bg-background">
         {imageList?.map((item, index) => {
-          const startTime = (index * calculateDuration()) / imageList?.length;
-          const duration = calculateDuration();
+          const startTime = (index * duration) / (imageList.length || 1);
 
           const scale = (index) => interpolate(
             frame,
-            [startTime, startTime+duration/2, startTime+duration],
-            index%2==0 ? [1, 1.8, 1]: [1.8, 1, 1.8],
-            {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}
-          )
+            [startTime, startTime + duration / 2, startTime + duration],
+            index % 2 === 0 ? [1, 1.8, 1] : [1.8, 1, 1.8],
+            { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+          );
+
           return (
-            <Sequence key={index} from={startTime} durationInFrames={calculateDuration()}>
+            <Sequence key={index} from={startTime} durationInFrames={duration}>
               <AbsoluteFill className="justify-center items-center">
                 <Img
                   src={item}
@@ -86,13 +99,13 @@ function RemotionVideo({ script, imageList, audioFileUrl, captions, setDurationI
           );
         })}
         {audioFileUrl && (
-          <Audio 
+          <Audio
             src={audioFileUrl}
             volume={interpolate(
               frame,
-              [duration - fps, duration],
-              [1, 0.9],
-              {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}
+              [duration - Math.ceil(fps * 0.75), duration - 1],
+              [1, 0],
+              { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
             )}
           />
         )}

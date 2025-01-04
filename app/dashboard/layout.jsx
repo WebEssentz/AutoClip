@@ -11,12 +11,44 @@ import { db } from '@/src/db';
 import { eq } from 'drizzle-orm';
 import { toast } from 'sonner';
 import { NavSkeleton, SideNavSkeleton } from '@/components/LoadingSkeleton';
+import { useLoadingStore } from "@/src/store/loadingState";
+import { AnimatePresence, motion } from "framer-motion";
+
+
+// Add SignOutSkeleton component
+const SignOutSkeleton = () => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    className="fixed inset-0 bg-background z-50"
+  >
+    <div className="flex flex-col h-full w-full">
+      <div className="h-14 bg-primary/5 animate-pulse" />
+      <div className="flex flex-1">
+        <div className="hidden md:block w-64 bg-primary/5 animate-pulse" />
+        <div className="flex-1 p-10 space-y-6">
+          <div className="h-8 w-1/4 bg-primary/5 animate-pulse rounded-md" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <div
+                key={i}
+                className="aspect-video bg-primary/5 animate-pulse rounded-lg"
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </motion.div>
+);
 
 function DashboardLayout({ children }) {
   const [videoData, setVideoData] = useState([]);
   const [userDetail, setUserDetail] = useState(null);
   const { user, isLoaded: isUserLoaded } = useUser();
   const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const isSigningOut = useLoadingStore(state => state.isSigningOut);
 
   // Initialize user data and check credits
   const initializeUserData = async () => {
@@ -128,24 +160,30 @@ function DashboardLayout({ children }) {
     );
   }
 
-// Render the layout once everything is loaded
-return (
-  <UserDetailContext.Provider value={{ userDetail, setUserDetail, isDataLoaded }}>
-    <VideoDataContext.Provider value={{ videoData, setVideoData }}>
-      <div className="min-h-screen bg-background">
-        <div className="hidden md:block h-screen fixed mt-14 border-r border-border/40 bg-background/60 dark:bg-transparent backdrop-blur-sm supports-[backdrop-filter]:bg-background/60 dark:supports-[backdrop-filter]:bg-background/0">
-          <SideNav />
-        </div>
-        <div>
-          <Header />
-        </div>
-        <main className="md:ml-64 pt-14 p-10">
-          {children}
-        </main>
-      </div>
-    </VideoDataContext.Provider>
-  </UserDetailContext.Provider>
-);
+  // Render the layout once everything is loaded
+  return (
+    <>
+      <AnimatePresence>
+        {isSigningOut && <SignOutSkeleton />}
+      </AnimatePresence>
+
+      <UserDetailContext.Provider value={{ userDetail, setUserDetail, isDataLoaded }}>
+        <VideoDataContext.Provider value={{ videoData, setVideoData }}>
+          <div className={`min-h-screen bg-background ${isSigningOut ? 'hidden' : ''}`}>
+            <div className="hidden md:block h-screen fixed mt-14 border-r border-border/40 bg-background/60 dark:bg-transparent backdrop-blur-sm supports-[backdrop-filter]:bg-background/60 dark:supports-[backdrop-filter]:bg-background/0">
+              <SideNav />
+            </div>
+            <div>
+              <Header />
+            </div>
+            <main className="md:ml-64 pt-14 p-10">
+              {children}
+            </main>
+          </div>
+        </VideoDataContext.Provider>
+      </UserDetailContext.Provider>
+    </>
+  );
 }
 
 export default DashboardLayout;

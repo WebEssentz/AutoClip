@@ -19,8 +19,8 @@ import {
 const descriptions = [
   "Transform your content into engaging short-form videos with AI",
   "Create viral-worthy clips in seconds",
-  "AI-powered editing that understands your content",
-  "Turn long videos into shareable moments"
+  "AI-powered creation that understands your content",
+  "Turn your ideas into shareable moments"
 ];
 
 // Enhanced Shimmer Effect Component
@@ -100,8 +100,8 @@ const SplashScreen = () => {
             <motion.div
               key={i}
               className={`absolute inset-0 rounded-2xl ${isDark
-                  ? 'bg-gradient-to-r from-violet-500/30 via-blue-500/30 to-cyan-500/30'
-                  : 'bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500'
+                ? 'bg-gradient-to-r from-violet-500/30 via-blue-500/30 to-cyan-500/30'
+                : 'bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500'
                 }`}
               initial={{ rotate: 0, scale: 1 }}
               animate={{
